@@ -1,0 +1,798 @@
+# Dutch translations for PeopleRP.
+# Copyright (C) 2024 PeopleRP
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-03-06 10:21+0300\n"
+"PO-Revision-Date: 2024-03-05 12:00+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app.py:119
+msgid "Project Manager"
+msgstr "Project Manager"
+
+#: app.py:119
+msgid "Senior Project Manager"
+msgstr "Senior Project Manager"
+
+#: app.py:119
+msgid "Senior Associate"
+msgstr "Senior Associate"
+
+#: app.py:119
+msgid "Associate"
+msgstr "Associate"
+
+#: app.py:119
+msgid "Specialist Role"
+msgstr "Specialist"
+
+#: app.py:120
+msgid "Internal"
+msgstr "Intern"
+
+#: app.py:120
+msgid "External"
+msgstr "Extern"
+
+#: app.py:120
+msgid "Initiative"
+msgstr "Initiatief"
+
+#: app.py:121
+msgid "Active"
+msgstr "Actief"
+
+#: app.py:121
+msgid "On Hold"
+msgstr "In de Wacht"
+
+#: app.py:121
+msgid "Completed"
+msgstr "Voltooid"
+
+#: app.py:121
+msgid "Cancelled"
+msgstr "Geannuleerd"
+
+#: templates/assignments.html:8
+msgid "Project Details"
+msgstr "Project Details"
+
+#: templates/assignments.html:10
+msgid "Back to Dashboard"
+msgstr "Terug naar Dashboard"
+
+#: templates/assignments.html:15 templates/projects.html:53
+#: templates/projects.html:147
+msgid "Project Name"
+msgstr "Project Naam"
+
+#: templates/assignments.html:19 templates/projects.html:24
+#: templates/projects.html:152
+msgid "Project Type"
+msgstr "Project Type"
+
+#: templates/assignments.html:27 templates/dashboard.html:98
+#: templates/projects.html:34 templates/projects.html:65
+#: templates/projects.html:162
+msgid "Status"
+msgstr "Status"
+
+#: templates/assignments.html:44 templates/assignments.html:156
+#: templates/projects.html:71 templates/projects.html:172
+msgid "Start Date"
+msgstr "Startdatum"
+
+#: templates/assignments.html:48 templates/assignments.html:162
+#: templates/projects.html:77 templates/projects.html:177
+msgid "End Date"
+msgstr "Einddatum"
+
+#: templates/assignments.html:52 templates/dashboard.html:104
+#: templates/projects.html:82
+msgid "Team Size"
+msgstr "Team Grootte"
+
+#: templates/assignments.html:53 templates/dashboard.html:141
+#: templates/projects.html:119
+msgid "members"
+msgstr "leden"
+
+#: templates/assignments.html:61 templates/dashboard.html:68
+#: templates/people.html:7
+msgid "Team Members"
+msgstr "Teamleden"
+
+#: templates/assignments.html:64 templates/assignments.html:130
+#: templates/assignments.html:190 templates/people.html:10
+#: templates/people.html:128 templates/people.html:174
+msgid "Add Team Member"
+msgstr "Teamlid Toevoegen"
+
+#: templates/assignments.html:72 templates/dashboard.html:182
+#: templates/people.html:53 templates/people.html:132
+msgid "Name"
+msgstr "Naam"
+
+#: templates/assignments.html:75 templates/dashboard.html:9
+#: templates/dashboard.html:188 templates/people.html:24
+#: templates/people.html:59 templates/people.html:137
+msgid "Role"
+msgstr "Rol"
+
+#: templates/assignments.html:78
+#, fuzzy, python-format
+msgid "Allocation"
+msgstr "Toewijzing (%%)"
+
+#: templates/assignments.html:81 templates/dashboard.html:193
+#: templates/people.html:68
+msgid "Total Allocation"
+msgstr "Totale Toewijzing"
+
+#: templates/assignments.html:84 templates/people.html:73
+#: templates/projects.html:85
+msgid "Actions"
+msgstr "Acties"
+
+#: templates/assignments.html:109 templates/people.html:108
+#: templates/projects.html:123
+msgid "Edit"
+msgstr "Bewerken"
+
+#: templates/assignments.html:113 templates/people.html:112
+#: templates/projects.html:127
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: templates/assignments.html:134
+#, fuzzy
+msgid "Team Member"
+msgstr "Teamleden"
+
+#: templates/assignments.html:137
+msgid "Select a team member"
+msgstr "Selecteer een teamlid"
+
+#: templates/assignments.html:151
+#, python-format
+msgid "Allocation (%%)"
+msgstr "Toewijzing (%%)"
+
+#: templates/assignments.html:170 templates/people.html:149
+#: templates/projects.html:184
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: templates/assignments.html:174 templates/people.html:153
+#: templates/projects.html:188
+msgid "Save"
+msgstr "Opslaan"
+
+#: templates/assignments.html:229
+msgid "Edit Assignment"
+msgstr ""
+
+#: templates/assignments.html:289
+msgid "Are you sure you want to remove this team member from the project?"
+msgstr ""
+
+#: templates/base.html:31 templates/faqs.html:72
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: templates/base.html:39 templates/dashboard.html:59
+#: templates/dashboard.html:84 templates/projects.html:7
+msgid "Projects"
+msgstr "Projecten"
+
+#: templates/base.html:47 templates/dashboard.html:66
+msgid "People"
+msgstr "Mensen"
+
+#: templates/base.html:55
+msgid "FAQs"
+msgstr "FAQ"
+
+#: templates/dashboard.html:12 templates/people.html:27
+msgid "All Roles"
+msgstr "Alle Rollen"
+
+#: templates/dashboard.html:19 templates/people.html:34
+msgid "Availability"
+msgstr "Beschikbaarheid"
+
+#: templates/dashboard.html:22 templates/people.html:37
+msgid "All"
+msgstr "Alle"
+
+#: templates/dashboard.html:23
+msgid "Full-time"
+msgstr "Voltijd"
+
+#: templates/dashboard.html:24
+msgid "Part-time"
+msgstr "Deeltijd"
+
+#: templates/dashboard.html:28
+msgid "Date"
+msgstr "Datum"
+
+#: templates/dashboard.html:36
+msgid "Export Allocations"
+msgstr "Toewijzingen Exporteren"
+
+#: templates/dashboard.html:46 templates/people.html:18
+#: templates/projects.html:18
+msgid "Search"
+msgstr "Zoeken"
+
+#: templates/dashboard.html:48
+msgid "Search projects or people..."
+msgstr "Zoek projecten of mensen..."
+
+#: templates/dashboard.html:61
+msgid "Active Projects"
+msgstr "Actieve Projecten"
+
+#: templates/dashboard.html:73
+msgid "Available Resources"
+msgstr "Beschikbare Resources"
+
+#: templates/dashboard.html:75
+#, python-format
+msgid "People with less than 50%% allocation"
+msgstr "Mensen met minder dan 50%% toewijzing"
+
+#: templates/dashboard.html:92
+msgid "Project"
+msgstr "Project"
+
+#: templates/dashboard.html:147
+msgid "Team Members:"
+msgstr "Teamleden:"
+
+#: templates/dashboard.html:175 templates/faqs.html:33
+msgid "Resource Allocation"
+msgstr "Resourcetoewijzing"
+
+#: templates/dashboard.html:192 templates/people.html:64
+msgid "Current Projects"
+msgstr "Huidige Projecten"
+
+#: templates/dashboard.html:229
+msgid "Allocation Overview"
+msgstr "Toewijzingsoverzicht"
+
+#: templates/faqs.html:5
+msgid "Frequently Asked Questions"
+msgstr "Veelgestelde Vragen"
+
+#: templates/faqs.html:10
+#, fuzzy
+msgid "Project Status"
+msgstr "Project Details"
+
+#: templates/faqs.html:13
+msgid "What do the different project statuses mean?"
+msgstr "Wat betekenen de verschillende projectstatussen?"
+
+#: templates/faqs.html:14
+msgid "Projects can have the following statuses:"
+msgstr "Projecten kunnen de volgende statussen hebben:"
+
+#: templates/faqs.html:16
+msgid "Active: The project is currently in progress"
+msgstr "Actief: Het project is momenteel in uitvoering"
+
+#: templates/faqs.html:17
+msgid "On Hold: The project is temporarily paused"
+msgstr "In de wacht: Het project is tijdelijk gepauzeerd"
+
+#: templates/faqs.html:18
+msgid "Completed: The project has been finished"
+msgstr "Voltooid: Het project is afgerond"
+
+#: templates/faqs.html:19
+msgid "Cancelled: The project has been terminated"
+msgstr "Geannuleerd: Het project is beëindigd"
+
+#: templates/faqs.html:20
+msgid "Not Started: The project start date is in the future"
+msgstr "Niet gestart: De startdatum van het project ligt in de toekomst"
+
+#: templates/faqs.html:21
+msgid "Overdue: The project has passed its end date without being completed"
+msgstr "Te laat: Het project heeft zijn einddatum overschreden zonder te zijn voltooid"
+
+#: templates/faqs.html:25
+msgid "Why do I see two different statuses for my project?"
+msgstr "Waarom zie ik twee verschillende statussen voor mijn project?"
+
+#: templates/faqs.html:26
+msgid "The system shows both an automated status (based on dates) and your manual status. The automated status helps track timeline progress, while the manual status reflects the actual project state you've set."
+msgstr "Het systeem toont zowel een geautomatiseerde status (gebaseerd op data) als uw handmatige status. De geautomatiseerde status helpt bij het volgen van de tijdlijnvoortgang, terwijl de handmatige status de werkelijke projectstatus weergeeft die u heeft ingesteld."
+
+#: templates/faqs.html:36
+#, fuzzy
+msgid "How is total allocation calculated?"
+msgstr "Totale Toewijzing"
+
+#: templates/faqs.html:37
+msgid "Total allocation is the sum of a person's assignments across all active projects only. Assignments to completed or cancelled projects are preserved for historical records but don't count toward the total allocation."
+msgstr "De totale toewijzing is de som van iemands toewijzingen over alle actieve projecten. Toewijzingen aan voltooide of geannuleerde projecten worden bewaard voor historische gegevens maar tellen niet mee voor de totale toewijzing."
+
+#: templates/faqs.html:40
+msgid "What do the allocation colors mean?"
+msgstr "Wat betekenen de toewijzingskleuren?"
+
+#: templates/faqs.html:42
+#, python-format
+msgid "Green: Less than 50%% allocation - Available for more work"
+msgstr "Groen: Minder dan 50%% toewijzing - Beschikbaar voor meer werk"
+
+#: templates/faqs.html:43
+#, python-format
+msgid "Yellow: 50-80%% allocation - Moderately loaded"
+msgstr "Geel: 50-80%% toewijzing - Matig belast"
+
+#: templates/faqs.html:44
+#, python-format
+msgid "Red: Over 80%% allocation - Heavily loaded"
+msgstr "Rood: Meer dan 80%% toewijzing - Zwaar belast"
+
+#: templates/faqs.html:52
+#, fuzzy
+msgid "Team Management"
+msgstr "Teamleden"
+
+#: templates/faqs.html:55
+msgid "How do I assign someone to multiple projects?"
+msgstr "Hoe wijs ik iemand toe aan meerdere projecten?"
+
+#: templates/faqs.html:56
+#, python-format
+msgid "You can assign a team member to multiple projects as long as their total allocation across active projects doesn't exceed 100%%. Go to each project's assignments page and add them with the appropriate allocation percentage."
+msgstr "U kunt een teamlid aan meerdere projecten toewijzen zolang hun totale toewijzing over actieve projecten niet hoger is dan 100%%. Ga naar de toewijzingspagina van elk project en voeg ze toe met het juiste toewijzingspercentage."
+
+#: templates/faqs.html:59
+msgid "What happens to team assignments when a project is completed?"
+msgstr "Wat gebeurt er met teamtoewijzingen wanneer een project is voltooid?"
+
+#: templates/faqs.html:60
+msgid "When a project is marked as completed:"
+msgstr "Wanneer een project als voltooid wordt gemarkeerd:"
+
+#: templates/faqs.html:62
+msgid "The assignments are preserved for historical record"
+msgstr "De toewijzingen worden bewaard voor historische gegevens"
+
+#: templates/faqs.html:63
+msgid "The allocations no longer count toward team members' total allocation"
+msgstr "De toewijzingen tellen niet meer mee voor de totale toewijzing van teamleden"
+
+#: templates/faqs.html:64
+msgid "Team members become available for new assignments"
+msgstr "Teamleden komen beschikbaar voor nieuwe toewijzingen"
+
+#: templates/faqs.html:75
+#, fuzzy
+msgid "What does \"Available Resources\" mean?"
+msgstr "Beschikbare Resources"
+
+#: templates/faqs.html:76
+msgid "Available Resources shows the number of team members who either:"
+msgstr "Beschikbare Resources toont het aantal teamleden die ofwel:"
+
+#: templates/faqs.html:78
+#, python-format
+msgid "Have less than 50%% total allocation across active projects"
+msgstr "Minder dan 50%% totale toewijzing hebben over actieve projecten"
+
+#: templates/faqs.html:79
+msgid "Are not currently assigned to any projects"
+msgstr "Momenteel niet zijn toegewezen aan projecten"
+
+#: templates/people.html:20
+msgid "Search by name or role..."
+msgstr "Zoek op naam of rol..."
+
+#: templates/people.html:38
+#, python-format
+msgid "Available (<50%%)"
+msgstr "Beschikbaar (<50%%)"
+
+#: templates/people.html:39
+#, python-format
+msgid "Partially Available (50-80%%)"
+msgstr "Gedeeltelijk Beschikbaar (50-80%%)"
+
+#: templates/people.html:40
+#, python-format
+msgid "Fully Allocated (>80%%)"
+msgstr "Volledig Toegewezen (>80%%)"
+
+#: templates/people.html:140
+msgid "Select a role"
+msgstr "Selecteer een rol"
+
+#: templates/people.html:192
+#, fuzzy
+msgid "Edit Team Member"
+msgstr "Teamlid Toevoegen"
+
+#: templates/people.html:222
+msgid "Are you sure you want to delete this team member?"
+msgstr ""
+
+#: templates/people.html:237 templates/people.html:241
+#, fuzzy
+msgid "Error deleting team member"
+msgstr "Selecteer een teamlid"
+
+#: templates/people.html:271 templates/people.html:275
+#, fuzzy
+msgid "Error saving team member"
+msgstr "Teamlid Toevoegen"
+
+#: templates/projects.html:10 templates/projects.html:143
+#: templates/projects.html:209
+msgid "Add Project"
+msgstr "Project Toevoegen"
+
+#: templates/projects.html:20
+msgid "Search by project name..."
+msgstr "Zoek op projectnaam..."
+
+#: templates/projects.html:27
+msgid "All Types"
+msgstr "Alle Types"
+
+#: templates/projects.html:37
+msgid "All Statuses"
+msgstr "Alle Statussen"
+
+#: templates/projects.html:59
+msgid "Type"
+msgstr "Type"
+
+#: templates/projects.html:155
+msgid "Select a type"
+msgstr "Selecteer een type"
+
+#: templates/projects.html:165
+msgid "Select a status"
+msgstr "Selecteer een status"
+
+#: templates/projects.html:230
+#, fuzzy
+msgid "Edit Project"
+msgstr "Project Toevoegen"
+
+#: templates/projects.html:263
+msgid "Are you sure you want to delete this project?"
+msgstr ""
+
+#: templates/projects.html:278 templates/projects.html:282
+#, fuzzy
+msgid "Error deleting project"
+msgstr "Huidige Projecten"
+
+#: templates/projects.html:314 templates/projects.html:318
+#, fuzzy
+msgid "Error saving project"
+msgstr "Huidige Projecten"
+
+#: venv/lib/python3.11/site-packages/click/_termui_impl.py:556
+#, python-brace-format
+msgid "{editor}: Editing failed"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/_termui_impl.py:560
+#, python-brace-format
+msgid "{editor}: Editing failed: {e}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:1124
+msgid "Aborted!"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:1349
+#: venv/lib/python3.11/site-packages/click/core.py:1379
+#, python-brace-format
+msgid "(Deprecated) {text}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:1396
+msgid "Options"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:1422
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:1438
+#, python-brace-format
+msgid "DeprecationWarning: The command {name!r} is deprecated."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:1645
+msgid "Commands"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:1677
+msgid "Missing command."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:1755
+#, python-brace-format
+msgid "No such command {name!r}."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:2313
+msgid "Value must be an iterable."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:2334
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:2783
+#, python-brace-format
+msgid "env var: {var}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:2813
+msgid "(dynamic)"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:2828
+#, python-brace-format
+msgid "default: {default}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/core.py:2841
+msgid "required"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/decorators.py:457
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/decorators.py:520
+msgid "Show the version and exit."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/decorators.py:541
+msgid "Show this message and exit."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:49
+#: venv/lib/python3.11/site-packages/click/exceptions.py:88
+#, python-brace-format
+msgid "Error: {message}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:80
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:129
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:131
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:187
+msgid "Missing argument"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:189
+msgid "Missing option"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:191
+msgid "Missing parameter"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:193
+#, python-brace-format
+msgid "Missing {param_type}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:200
+#, python-brace-format
+msgid "Missing parameter: {param_name}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:220
+#, python-brace-format
+msgid "No such option: {name}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:232
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:270
+msgid "unknown error"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:277
+#, python-brace-format
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/parser.py:233
+#, python-brace-format
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/parser.py:415
+#, python-brace-format
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/parser.py:476
+#, python-brace-format
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/shell_completion.py:326
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/shell_completion.py:333
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:158
+msgid "Repeat for confirmation"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:174
+msgid "Error: The value you entered was invalid."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:176
+#, python-brace-format
+msgid "Error: {e.message}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:187
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:243
+msgid "Error: invalid input"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:773
+msgid "Press any key to continue..."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:267
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:299
+#, python-brace-format
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:393
+#, python-brace-format
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:415
+#, python-brace-format
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:471
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:612
+#, python-brace-format
+msgid "{value!r} is not a valid boolean."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:636
+#, python-brace-format
+msgid "{value!r} is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:826
+msgid "file"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:828
+msgid "directory"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:830
+msgid "path"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:881
+#, python-brace-format
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:890
+#, python-brace-format
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:898
+#, python-brace-format
+msgid "{name} {filename!r} is a directory."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:907
+#, python-brace-format
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:916
+#, python-brace-format
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:925
+#, python-brace-format
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:992
+#, python-brace-format
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#~ msgid "Not Started"
+#~ msgstr "Niet Gestart"
+
+#~ msgid "Overdue"
+#~ msgstr "Te Laat"
+

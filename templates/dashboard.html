@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Filters -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex flex-wrap gap-4 items-end">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ _('Role') }}</label>
+                <select id="roleFilter" onchange="applyFilters()" 
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <option value="">{{ _('All Roles') }}</option>
+                    {% for role in config['ROLES'] %}
+                    <option value="{{ role }}">{{ _(role) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ _('Availability') }}</label>
+                <select id="availabilityFilter" onchange="applyFilters()"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <option value="">{{ _('All') }}</option>
+                    <option value="Full-time">{{ _('Full-time') }}</option>
+                    <option value="Part-time">{{ _('Part-time') }}</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ _('Date') }}</label>
+                <input type="date" id="dateFilter" onchange="applyFilters()"
+                       value="{{ request.args.get('date', '') or now.strftime('%Y-%m-%d') }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+            </div>
+            <div>
+                <button onclick="exportAllocations()" 
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                    {{ _('Export Allocations') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex flex-wrap gap-4 items-end mb-4">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700">{{ _('Search') }}</label>
+                <input type="text" id="searchInput" 
+                       placeholder="{{ _('Search projects or people...') }}"
+                       value="{{ request.args.get('search', '') }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Project Summary -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold mb-2">{{ _('Projects') }}</h2>
+            <div class="text-3xl font-bold text-blue-600">{{ active_projects }}</div>
+            <p class="text-sm text-gray-600">{{ _('Active Projects') }}</p>
+        </div>
+
+        <!-- People Summary -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold mb-2">{{ _('People') }}</h2>
+            <div class="text-3xl font-bold text-green-600">{{ total_people }}</div>
+            <p class="text-sm text-gray-600">{{ _('Team Members') }}</p>
+        </div>
+
+        <!-- Availability Summary -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold mb-2">{{ _('Available Resources') }}</h2>
+            <div class="text-3xl font-bold text-yellow-600">{{ available_count }}</div>
+            <p class="text-sm text-gray-600">{{ _('People with less than 50%% allocation') }}</p>
+        </div>
+    </div>
+
+    <!-- Project Status -->
+    {% for project_type in ['External', 'Internal', 'Initiative'] %}
+    {% set type_projects = projects|selectattr('project_type', 'equalto', project_type)|list %}
+    {% if type_projects|length > 0 %}
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">{{ _(project_type) }} {{ _('Projects') }}</h2>
+        <div class="overflow-x-auto">
+            <table id="projectTable_{{ project_type }}" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="w-8 px-6 py-3"></th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <button onclick="sortTable('name', '{{ project_type }}')" class="flex items-center space-x-1">
+                                <span>{{ _('Project') }}</span>
+                                <span class="sort-indicator">↕</span>
+                            </button>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <button onclick="sortTable('status', '{{ project_type }}')" class="flex items-center space-x-1">
+                                <span>{{ _('Status') }}</span>
+                                <span class="sort-indicator">↕</span>
+                            </button>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <button onclick="sortTable('team_count', '{{ project_type }}')" class="flex items-center space-x-1">
+                                <span>{{ _('Team Size') }}</span>
+                                <span class="sort-indicator">↕</span>
+                            </button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for project in type_projects %}
+                    {% if project.status == 'Active' %}
+                    <tr class="project-row" data-project-id="{{ project.id }}">
+                        <td class="px-6 py-4">
+                            <button onclick="toggleProjectDetails('{{ project.id }}')" class="text-gray-500 hover:text-gray-700">
+                                <svg class="w-4 h-4 transform transition-transform duration-200 expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{{ url_for('main.project_assignments', project_id=project.id) }}" 
+                               class="text-indigo-600 hover:text-indigo-900">
+                                {{ project.name }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if project.automated_status == 'Active' %}bg-green-100 text-green-800
+                                {% elif project.automated_status == 'On Hold' %}bg-yellow-100 text-yellow-800
+                                {% elif project.automated_status == 'Completed' %}bg-blue-100 text-blue-800
+                                {% elif project.automated_status == 'Not Started' %}bg-purple-100 text-purple-800
+                                {% elif project.automated_status == 'Overdue' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ _(project.automated_status) }}
+                            </span>
+                            {% if project.automated_status != project.status %}
+                                <span class="ml-2 text-xs text-gray-500">({{ _(project.status) }})</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ project.team_count }} {{ _('members') }}</td>
+                    </tr>
+                    <tr id="details-{{ project.id }}" class="project-details hidden bg-gray-50">
+                        <td></td>
+                        <td colspan="3" class="px-6 py-4">
+                            <div class="text-sm text-gray-900">
+                                <h4 class="font-medium mb-2">{{ _('Team Members:') }}</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {% for person in people %}
+                                    {% for project_assignment in person.projects %}
+                                        {% if project_assignment.name == project.name %}
+                                        <div class="flex items-center space-x-2">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-gray-100">{{ _(person.role) }}</span>
+                                            <span>{{ person.name }}</span>
+                                            <span class="text-gray-500">({{ project_assignment.allocation }}%)</span>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Resource Allocation -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">{{ _('Resource Allocation') }}</h2>
+        <div class="overflow-x-auto">
+            <table id="resourceTable" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <button onclick="sortTable('name')" class="flex items-center space-x-1">
+                                <span>{{ _('Name') }}</span>
+                                <span class="sort-indicator">↕</span>
+                            </button>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <button onclick="sortTable('role')" class="flex items-center space-x-1">
+                                <span>{{ _('Role') }}</span>
+                                <span class="sort-indicator">↕</span>
+                            </button>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Current Projects') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Total Allocation') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for person in people %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ person.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                {{ _(person.role) }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% for project in person.projects %}
+                            {% if project.status not in ['Not Started', 'Completed'] %}
+                            <div class="text-sm">
+                                {{ project.name }} ({{ project.allocation }}%)
+                                <span class="text-xs text-gray-500">[{{ _(project.status) }}]</span>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if person.current_allocation > 80 %}bg-red-100 text-red-800
+                                {% elif person.current_allocation > 50 %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ person.current_allocation }}%
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Allocation Overview Chart -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">{{ _('Allocation Overview') }}</h2>
+        <canvas id="allocationChart"></canvas>
+    </div>
+</div>
+
+<!-- Add Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Define currentSort at the top
+let currentSort = {
+    column: '{{ request.args.get("sort_by", "") }}',
+    order: '{{ request.args.get("sort_order", "asc") }}'
+};
+
+function applyFilters() {
+    const role = document.getElementById('roleFilter').value;
+    const availability = document.getElementById('availabilityFilter').value;
+    const date = document.getElementById('dateFilter').value;
+    const search = document.getElementById('searchInput').value;
+    
+    const params = new URLSearchParams(window.location.search);
+    if (role) params.set('role', role);
+    if (availability) params.set('availability', availability);
+    if (date) params.set('date', date);
+    if (search) params.set('search', search);
+    
+    window.location.href = `/?${params.toString()}`;
+}
+
+function exportAllocations() {
+    window.location.href = '/export/allocations';
+}
+
+// Set initial filter values from URL
+window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('role')) document.getElementById('roleFilter').value = params.get('role');
+    if (params.get('availability')) document.getElementById('availabilityFilter').value = params.get('availability');
+    if (params.get('date')) document.getElementById('dateFilter').value = params.get('date');
+    if (params.get('search')) document.getElementById('searchInput').value = params.get('search');
+});
+
+// Update the chart initialization code
+const chartCanvas = document.getElementById('allocationChart');
+if (chartCanvas) {
+    const ctx = chartCanvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ people|map(attribute='name')|list|tojson|safe }},
+            datasets: [{
+                label: 'Current Allocation %',
+                data: {{ people|map(attribute='current_allocation')|list|tojson|safe }},
+                backgroundColor: {{ people|map(attribute='current_allocation')|map('get_color')|list|tojson|safe }},
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Allocation %'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function toggleProjectDetails(projectId) {
+    const detailsRow = document.getElementById(`details-${projectId}`);
+    const button = document.querySelector(`tr[data-project-id="${projectId}"] button`);
+    const icon = button.querySelector('.expand-icon');
+    
+    if (detailsRow.classList.contains('hidden')) {
+        detailsRow.classList.remove('hidden');
+        icon.classList.add('rotate-90');
+    } else {
+        detailsRow.classList.add('hidden');
+        icon.classList.remove('rotate-90');
+    }
+}
+
+function sortTable(column, projectType) {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (currentSort.column === column) {
+        currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.order = 'asc';
+    }
+    
+    params.set('sort_by', currentSort.column);
+    params.set('sort_order', currentSort.order);
+    
+    // Update URL without reload
+    window.history.pushState({}, '', `/?${params.toString()}`);
+    
+    // Sort the specific project type table
+    sortTableData(`projectTable_${projectType}`, column);
+    
+    // Update sort indicators
+    updateSortIndicators();
+}
+
+// Add this new function for the actual sorting
+function sortTableData(tableId, column) {
+    const table = document.querySelector(`#${tableId}`);
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    rows.sort((a, b) => {
+        let aValue = getCellValue(a, column);
+        let bValue = getCellValue(b, column);
+        
+        // Handle numeric values
+        if (!isNaN(aValue) && !isNaN(bValue)) {
+            aValue = parseFloat(aValue);
+            bValue = parseFloat(bValue);
+        }
+        
+        if (aValue === bValue) return 0;
+        
+        const comparison = aValue > bValue ? 1 : -1;
+        return currentSort.order === 'asc' ? comparison : -comparison;
+    });
+    
+    // Re-append rows in new order
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// Add this helper function to get cell values
+function getCellValue(row, column) {
+    // Find the cell index based on the column name
+    const headerRow = row.closest('table').querySelector('thead tr');
+    const headerCells = Array.from(headerRow.querySelectorAll('th button'));
+    const columnIndex = headerCells.findIndex(cell => 
+        cell.querySelector('span:first-child').textContent.toLowerCase() === column
+    );
+    
+    if (columnIndex === -1) return '';
+    
+    const cell = row.cells[columnIndex];
+    
+    // Handle special cases
+    if (column === 'team_count') {
+        return parseInt(cell.textContent.split(' ')[0]);
+    }
+    
+    // For cells with status spans
+    const statusSpan = cell.querySelector('span');
+    if (statusSpan) {
+        return statusSpan.textContent.trim();
+    }
+    
+    // For cells with links
+    const link = cell.querySelector('a');
+    if (link) {
+        return link.textContent.trim();
+    }
+    
+    return cell.textContent.trim();
+}
+
+// Add debounced search function
+let searchTimeout;
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (this.value) {
+            params.set('search', this.value);
+        } else {
+            params.delete('search');
+        }
+        window.location.href = `/?${params.toString()}`;
+    }, 300);
+});
+
+// Update sort indicators on load
+function updateSortIndicators() {
+    const indicators = document.querySelectorAll('.sort-indicator');
+    indicators.forEach(indicator => {
+        const column = indicator.parentElement.querySelector('span:first-child').textContent.toLowerCase();
+        if (column === currentSort.column) {
+            indicator.textContent = currentSort.order === 'asc' ? '↑' : '↓';
+        } else {
+            indicator.textContent = '↕';
+        }
+    });
+}
+
+updateSortIndicators();
+</script>
+
+<style>
+/* Add these styles to your CSS */
+.sort-indicator {
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+}
+
+th button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    color: inherit;
+}
+
+th button:hover {
+    color: #4F46E5;
+}
+
+.project-details.hidden {
+    display: none;
+}
+
+.expand-icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+.expand-icon.rotate-90 {
+    transform: rotate(90deg);
+}
+</style>
+{% endblock %} 

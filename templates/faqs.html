@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6">
+    <h1 class="text-2xl font-bold mb-6">{{ _('Frequently Asked Questions') }}</h1>
+    
+    <div class="space-y-6">
+        <!-- Project Status -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4">{{ _('Project Status') }}</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">{{ _('What do the different project statuses mean?') }}</h3>
+                    <p class="mt-2 text-gray-600">{{ _('Projects can have the following statuses:') }}</p>
+                    <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600 ml-4">
+                        <li>{{ _('Active: The project is currently in progress') }}</li>
+                        <li>{{ _('On Hold: The project is temporarily paused') }}</li>
+                        <li>{{ _('Completed: The project has been finished') }}</li>
+                        <li>{{ _('Cancelled: The project has been terminated') }}</li>
+                        <li>{{ _('Not Started: The project start date is in the future') }}</li>
+                        <li>{{ _('Overdue: The project has passed its end date without being completed') }}</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">{{ _('Why do I see two different statuses for my project?') }}</h3>
+                    <p class="mt-2 text-gray-600">{{ _('The system shows both an automated status (based on dates) and your manual status. The automated status helps track timeline progress, while the manual status reflects the actual project state you\'ve set.') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resource Allocation -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4">{{ _('Resource Allocation') }}</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">{{ _('How is total allocation calculated?') }}</h3>
+                    <p class="mt-2 text-gray-600">{{ _('Total allocation is calculated based on project status:') }}</p>
+                    <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600 ml-4">
+                        <li>{{ _('Not Started projects: 0%% allocation (not counted)') }}</li>
+                        <li>{{ _('Active projects: 100%% of assigned allocation') }}</li>
+                        <li>{{ _('On Hold projects: 100%% of assigned allocation') }}</li>
+                        <li>{{ _('Overdue projects: 100%% of assigned allocation') }}</li>
+                        <li>{{ _('Completed projects: 0%% allocation (not counted)') }}</li>
+                    </ul>
+                    <p class="mt-2 text-gray-600">{{ _('For example, if someone is assigned 30%% to an Active project and 40%% to a Not Started project, their total allocation would be 30%% since the Not Started project is not counted.') }}</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">{{ _('What do the allocation colors mean?') }}</h3>
+                    <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600 ml-4">
+                        <li>{{ _('Green: Less than 50%% allocation - Available for more work') }}</li>
+                        <li>{{ _('Yellow: 50-80%% allocation - Moderately loaded') }}</li>
+                        <li>{{ _('Red: Over 80%% allocation - Heavily loaded') }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Management -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4">{{ _('Team Management') }}</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">{{ _('How do I assign someone to multiple projects?') }}</h3>
+                    <p class="mt-2 text-gray-600">{{ _('You can assign a team member to multiple projects as long as their total allocation across active projects doesn\'t exceed 100%%. Go to each project\'s assignments page and add them with the appropriate allocation percentage.') }}</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">{{ _('What happens to team assignments when a project is completed?') }}</h3>
+                    <p class="mt-2 text-gray-600">{{ _('When a project is marked as completed:') }}</p>
+                    <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600 ml-4">
+                        <li>{{ _('The assignments are preserved for historical record') }}</li>
+                        <li>{{ _('The allocations no longer count toward team members\' total allocation') }}</li>
+                        <li>{{ _('Team members become available for new assignments') }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4">{{ _('Dashboard') }}</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">{{ _('What does "Available Resources" mean?') }}</h3>
+                    <p class="mt-2 text-gray-600">{{ _('Available Resources shows the number of team members who either:') }}</p>
+                    <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600 ml-4">
+                        <li>{{ _('Have less than 50%% total allocation across active projects') }}</li>
+                        <li>{{ _('Are not currently assigned to any projects') }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Users - {{ organization_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold">{{ _('Users') }}</h1>
+        {% if session['user_role'] in ['Superuser', 'Privileged'] %}
+        <button onclick="openUserModal()" 
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
+            {{ _('Invite User') }}
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button onclick="sortTable('name')" class="flex items-center space-x-1">
+                            <span>{{ _('Name') }}</span>
+                            <span class="sort-indicator">↕</span>
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button onclick="sortTable('email')" class="flex items-center space-x-1">
+                            <span>{{ _('Email') }}</span>
+                            <span class="sort-indicator">↕</span>
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button onclick="sortTable('role')" class="flex items-center space-x-1">
+                            <span>{{ _('Role') }}</span>
+                            <span class="sort-indicator">↕</span>
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Status') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Actions') }}</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for user in users %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">{{ user.email }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                            {{ user.role }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ 'Active' if user.is_active else 'Suspended' }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {% if not user.is_superuser and session['user_role'] == 'Superuser' or (session['user_role'] == 'Privileged' and user.role == 'Normal') %}
+                        <button 
+                            class="toggle-status-btn text-indigo-600 hover:text-indigo-900"
+                            data-user-id="{{ user.id }}"
+                            data-current-status="{{ user.is_active }}"
+                            {% if user.id == current_user_id %}disabled{% endif %}
+                        >
+                            {{ 'Suspend' if user.is_active else 'Activate' }}
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Invite User Modal -->
+<div id="userModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900" id="modalTitle">{{ _('Invite User') }}</h3>
+                <form id="userForm" class="mt-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">{{ _('Name') }}</label>
+                        <input type="text" id="name" name="name" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">{{ _('Email') }}</label>
+                        <input type="email" id="email" name="email" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    {% if session['user_role'] == 'Superuser' %}
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">{{ _('Role') }}</label>
+                        <select id="role" name="role" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="Normal">{{ _('Normal') }}</option>
+                            <option value="Privileged">{{ _('Privileged') }}</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            {{ _('Note: Superuser role can only be assigned during organization creation') }}
+                        </p>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="closeUserModal()"
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg">
+                            {{ _('Cancel') }}
+                        </button>
+                        <button type="submit"
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
+                            {{ _('Invite') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentSort = {
+    column: 'name',
+    order: 'asc'
+};
+
+// Table sorting function
+function sortTable(column) {
+    if (currentSort.column === column) {
+        currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.order = 'asc';
+    }
+    
+    const tbody = document.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    rows.sort((a, b) => {
+        let aValue = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent.trim();
+        let bValue = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent.trim();
+        
+        if (currentSort.order === 'desc') {
+            [aValue, bValue] = [bValue, aValue];
+        }
+        
+        return aValue.localeCompare(bValue, undefined, { numeric: true, sensitivity: 'base' });
+    });
+    
+    rows.forEach(row => tbody.appendChild(row));
+    
+    // Update sort indicators
+    document.querySelectorAll('.sort-indicator').forEach(indicator => {
+        indicator.textContent = '↕';
+    });
+    const currentIndicator = document.querySelector(`button[onclick="sortTable('${column}')"] .sort-indicator`);
+    currentIndicator.textContent = currentSort.order === 'asc' ? '↓' : '↑';
+}
+
+function getColumnIndex(column) {
+    const columnMap = {
+        'name': 1,
+        'email': 2,
+        'role': 3
+    };
+    return columnMap[column] || 1;
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold">{{ _('Projects') }}</h1>
+        <button onclick="openProjectModal()" 
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
+            {{ _('Add Project') }}
+        </button>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700">{{ _('Search') }}</label>
+                <input type="text" id="searchInput" 
+                       placeholder="{{ _('Search by project name...') }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ _('Project Type') }}</label>
+                <select id="typeFilter" 
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <option value="">{{ _('All Types') }}</option>
+                    {% for type in project_types %}
+                    <option value="{{ type }}">{{ _(type) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ _('Status') }}</label>
+                <select id="statusFilter"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <option value="">{{ _('All Statuses') }}</option>
+                    {% for status in project_statuses %}
+                    <option value="{{ status }}">{{ _(status) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button onclick="sortTable('name')" class="flex items-center space-x-1">
+                            <span>{{ _('Project Name') }}</span>
+                            <span class="sort-indicator">↕</span>
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button onclick="sortTable('type')" class="flex items-center space-x-1">
+                            <span>{{ _('Type') }}</span>
+                            <span class="sort-indicator">↕</span>
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button onclick="sortTable('status')" class="flex items-center space-x-1">
+                            <span>{{ _('Status') }}</span>
+                            <span class="sort-indicator">↕</span>
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button onclick="sortTable('start_date')" class="flex items-center space-x-1">
+                            <span>{{ _('Start Date') }}</span>
+                            <span class="sort-indicator">↕</span>
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button onclick="sortTable('end_date')" class="flex items-center space-x-1">
+                            <span>{{ _('End Date') }}</span>
+                            <span class="sort-indicator">↕</span>
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ _('Team Size') }}
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ _('Actions') }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for project in projects %}
+                <tr class="project-row" data-project-id="{{ project.id }}">
+                    <td class="px-6 py-4">
+                        <button onclick="toggleProjectDetails('{{ project.id }}')" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-4 h-4 transform transition-transform duration-200 expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ url_for('main.project_assignments', project_id=project.id) }}" 
+                           class="text-indigo-600 hover:text-indigo-900">
+                            {{ project.name }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                            {{ _(project.project_type) }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if project.automated_status == 'Active' %}bg-green-100 text-green-800
+                            {% elif project.automated_status == 'On Hold' %}bg-yellow-100 text-yellow-800
+                            {% elif project.automated_status == 'Completed' %}bg-blue-100 text-blue-800
+                            {% elif project.automated_status == 'Not Started' %}bg-purple-100 text-purple-800
+                            {% elif project.automated_status == 'Overdue' %}bg-red-100 text-red-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ _(project.automated_status) }}
+                        </span>
+                        {% if project.automated_status != project.status %}
+                            <span class="ml-2 text-xs text-gray-500">({{ _(project.status) }})</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ project.start_date }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ project.end_date }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ project.team_count }} {{ _('members') }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="openEditModal('{{ project.id }}', '{{ project.name }}', '{{ project.project_type }}', '{{ project.status }}', '{{ project.start_date }}', '{{ project.end_date }}')"
+                                class="text-indigo-600 hover:text-indigo-900 mr-4">
+                            {{ _('Edit') }}
+                        </button>
+                        <button onclick="deleteProject('{{ project.id }}')"
+                                class="text-red-600 hover:text-red-900">
+                            {{ _('Delete') }}
+                        </button>
+                    </td>
+                </tr>
+                <tr id="details-{{ project.id }}" class="project-details hidden bg-gray-50">
+                    <td></td>
+                    <td colspan="7" class="px-6 py-4">
+                        <div class="text-sm text-gray-900">
+                            <h4 class="font-medium mb-2">{{ _('Team Members:') }}</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {% for assignment in project.assignments %}
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100">{{ _(assignment.role) }}</span>
+                                    <span>{{ assignment.name }}</span>
+                                    <span class="text-gray-500">({{ assignment.allocation }}%)</span>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add/Edit Project Modal -->
+<div id="projectModal" class="fixed inset-0 transition-opacity duration-300 ease-in-out opacity-0 pointer-events-none">
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50"></div>
+    <div class="relative z-10">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white transform transition-all duration-300 ease-in-out -translate-y-4 opacity-0">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900" id="modalTitle">{{ _('Add Project') }}</h3>
+                <form id="projectForm" class="mt-4">
+                    <input type="hidden" id="projectId">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">{{ _('Project Name') }}</label>
+                        <input type="text" id="name" name="name" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">{{ _('Project Type') }}</label>
+                        <select id="projectType" name="project_type" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="">{{ _('Select a type') }}</option>
+                            {% for type in project_types %}
+                            <option value="{{ type }}">{{ _(type) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">{{ _('Status') }}</label>
+                        <select id="status" name="status" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="">{{ _('Select a status') }}</option>
+                            {% for status in project_statuses %}
+                            <option value="{{ status }}">{{ _(status) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">{{ _('Start Date') }}</label>
+                        <input type="date" id="startDate" name="start_date" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">{{ _('End Date') }}</label>
+                        <input type="date" id="endDate" name="end_date" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="closeModal()"
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg">
+                            {{ _('Cancel') }}
+                        </button>
+                        <button type="submit"
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
+                            {{ _('Save') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSort = {
+    column: '{{ request.args.get("sort_by", "start_date") }}',
+    order: '{{ request.args.get("sort_order", "asc") }}'
+};
+
+// Modal management functions
+function openProjectModal() {
+    const modal = document.getElementById('projectModal');
+    const modalContent = modal.querySelector('.relative.top-20');
+    
+    // Reset form
+    document.getElementById('modalTitle').textContent = "{{ _('Add Project') }}";
+    document.getElementById('projectId').value = '';
+    document.getElementById('name').value = '';
+    document.getElementById('projectType').value = '';
+    document.getElementById('status').value = '';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    
+    // Show modal with animation
+    modal.classList.remove('pointer-events-none');
+    requestAnimationFrame(() => {
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('-translate-y-4', 'opacity-0');
+    });
+}
+
+function openEditModal(id, name, type, status, startDate, endDate) {
+    const modal = document.getElementById('projectModal');
+    const modalContent = modal.querySelector('.relative.top-20');
+    
+    // Set form values
+    document.getElementById('modalTitle').textContent = "{{ _('Edit Project') }}";
+    document.getElementById('projectId').value = id;
+    document.getElementById('name').value = name;
+    document.getElementById('projectType').value = type;
+    document.getElementById('status').value = status;
+    document.getElementById('startDate').value = startDate;
+    document.getElementById('endDate').value = endDate;
+    
+    // Show modal with animation
+    modal.classList.remove('pointer-events-none');
+    requestAnimationFrame(() => {
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('-translate-y-4', 'opacity-0');
+    });
+}
+
+function closeModal() {
+    const modal = document.getElementById('projectModal');
+    const modalContent = modal.querySelector('.relative.top-20');
+    
+    // Hide modal with animation
+    modalContent.classList.add('-translate-y-4', 'opacity-0');
+    modal.classList.remove('opacity-100');
+    
+    // Wait for animation to finish before hiding completely
+    setTimeout(() => {
+        modal.classList.add('pointer-events-none');
+        document.getElementById('projectForm').reset();
+    }, 300);
+}
+
+// Project management functions
+async function deleteProject(id) {
+    if (!confirm("{{ _('Are you sure you want to delete this project?') }}")) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/projects/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert("{{ _('Error deleting project') }}");
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert("{{ _('Error deleting project') }}");
+    }
+}
+
+// Form submission handler
+document.getElementById('projectForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('name').value,
+        project_type: document.getElementById('projectType').value,
+        status: document.getElementById('status').value,
+        start_date: document.getElementById('startDate').value,
+        end_date: document.getElementById('endDate').value
+    };
+    
+    const projectId = document.getElementById('projectId').value;
+    const method = projectId ? 'PUT' : 'POST';
+    const url = projectId ? `/projects/${projectId}` : '/projects';
+    
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert("{{ _('Error saving project') }}");
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert("{{ _('Error saving project') }}");
+    }
+});
+
+function sortTable(column) {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (currentSort.column === column) {
+        currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.order = 'asc';
+    }
+    
+    params.set('sort_by', currentSort.column);
+    params.set('sort_order', currentSort.order);
+    
+    window.location.href = `?${params.toString()}`;
+}
+
+// Add debounced search function
+let searchTimeout;
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (this.value) {
+            params.set('search', this.value);
+        } else {
+            params.delete('search');
+        }
+        window.location.href = `?${params.toString()}`;
+    }, 300);
+});
+
+// Update sort indicators on load
+function updateSortIndicators() {
+    const indicators = document.querySelectorAll('.sort-indicator');
+    indicators.forEach(indicator => {
+        const column = indicator.parentElement.querySelector('span:first-child').textContent.toLowerCase();
+        if (column === currentSort.column) {
+            indicator.textContent = currentSort.order === 'asc' ? '↑' : '↓';
+        } else {
+            indicator.textContent = '↕';
+        }
+    });
+}
+
+// Set initial search value and update sort indicators
+window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('search')) searchInput.value = params.get('search');
+    updateSortIndicators();
+});
+
+function toggleProjectDetails(projectId) {
+    const detailsRow = document.getElementById(`details-${projectId}`);
+    const button = document.querySelector(`tr[data-project-id="${projectId}"] button`);
+    const icon = button.querySelector('.expand-icon');
+    
+    if (detailsRow.classList.contains('hidden')) {
+        detailsRow.classList.remove('hidden');
+        icon.classList.add('rotate-90');
+    } else {
+        detailsRow.classList.add('hidden');
+        icon.classList.remove('rotate-90');
+    }
+}
+</script>
+
+<style>
+.sort-indicator {
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+}
+
+th button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    color: inherit;
+}
+
+th button:hover {
+    color: #4F46E5;
+}
+
+.project-details.hidden {
+    display: none;
+}
+
+.expand-icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+.expand-icon.rotate-90 {
+    transform: rotate(90deg);
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Resource Planning</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .otp-input::-webkit-outer-spin-button,
+        .otp-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .otp-input {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md w-96 max-w-full mx-4">
+        <h1 class="text-2xl font-bold mb-6 text-center">Login</h1>
+        
+        <!-- Email Form -->
+        <div id="emailForm" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="email" name="email" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <button onclick="requestOTP()" id="requestOTPBtn"
+                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Request Login Code
+            </button>
+        </div>
+
+        <!-- OTP Form (initially hidden) -->
+        <div id="otpForm" class="space-y-6 hidden">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 text-center mb-4">Enter Login Code</label>
+                <div class="flex justify-center space-x-2">
+                    <input type="number" class="otp-input w-12 h-12 text-center text-xl border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" maxlength="1" pattern="[0-9]">
+                    <input type="number" class="otp-input w-12 h-12 text-center text-xl border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" maxlength="1" pattern="[0-9]">
+                    <input type="number" class="otp-input w-12 h-12 text-center text-xl border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" maxlength="1" pattern="[0-9]">
+                    <input type="number" class="otp-input w-12 h-12 text-center text-xl border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" maxlength="1" pattern="[0-9]">
+                    <input type="number" class="otp-input w-12 h-12 text-center text-xl border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" maxlength="1" pattern="[0-9]">
+                    <input type="number" class="otp-input w-12 h-12 text-center text-xl border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" maxlength="1" pattern="[0-9]">
+                </div>
+            </div>
+            <div class="flex space-x-4">
+                <button onclick="verifyOTP()" id="verifyOTPBtn"
+                    class="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Verify Code
+                </button>
+                <button onclick="requestOTP()" id="resendOTPBtn"
+                    class="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Resend Code
+                </button>
+            </div>
+            <div id="timer" class="text-sm text-gray-500 text-center"></div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="mt-4 text-sm text-red-600 text-center hidden"></div>
+    </div>
+
+    <script>
+        let timerInterval;
+        const otpInputs = document.querySelectorAll('.otp-input');
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        function startTimer(duration) {
+            let timer = duration;
+            const timerDisplay = document.getElementById('timer');
+            
+            clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                const minutes = parseInt(timer / 60, 10);
+                const seconds = parseInt(timer % 60, 10);
+                
+                timerDisplay.textContent = `Code expires in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = 'Code expired. Please request a new one.';
+                }
+            }, 1000);
+        }
+
+        // Handle OTP input boxes
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length > 1) {
+                    e.target.value = e.target.value.slice(0, 1);
+                }
+                
+                if (e.target.value.length === 1) {
+                    if (index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            // Prevent e, E, +, - in number input
+            input.addEventListener('keydown', (e) => {
+                if (['e', 'E', '+', '-'].includes(e.key)) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        async function requestOTP() {
+            const email = document.getElementById('email').value;
+            if (!email) {
+                showError('Please enter your email address');
+                return;
+            }
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('emailForm').classList.add('hidden');
+                    document.getElementById('otpForm').classList.remove('hidden');
+                    // Clear any existing OTP inputs
+                    otpInputs.forEach(input => input.value = '');
+                    // Focus the first input
+                    otpInputs[0].focus();
+                    startTimer(300); // 5 minutes
+                } else {
+                    showError(data.error || 'Failed to send login code');
+                }
+            } catch (error) {
+                showError('An error occurred. Please try again.');
+            }
+        }
+
+        async function verifyOTP() {
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            
+            if (otp.length !== 6) {
+                showError('Please enter the complete 6-digit code');
+                return;
+            }
+
+            try {
+                const response = await fetch('/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ otp }),
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    clearInterval(timerInterval);
+                    // Redirect to the dashboard or provided URL
+                    window.location.href = data.redirect_url || '/';
+                } else {
+                    showError(data.error || 'Failed to verify code');
+                    // Clear OTP inputs on error
+                    otpInputs.forEach(input => input.value = '');
+                    otpInputs[0].focus();
+                }
+            } catch (error) {
+                showError('An error occurred. Please try again.');
+            }
+        }
+
+        // Handle Enter key
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                requestOTP();
+            }
+        });
+
+        // Handle Enter key in OTP inputs
+        otpInputs[otpInputs.length - 1].addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyOTP();
+            }
+        });
+    </script>
+</body>
+</html> 
