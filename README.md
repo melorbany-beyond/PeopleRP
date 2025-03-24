@@ -45,16 +45,11 @@ POSTMARK_API_KEY=your_postmark_api_key
 EOL
 ```
 
-5. Initialize the database and run migrations:
+5. Reset the DB:
 ```bash
-python migrate.py
+python reset_db.py
 ```
 
-6. Create your organization and superuser:
-```bash
-python manage.py create-org --name "Beyond Company" --superuser-email "fares@beyondcompany.sa" --superuser-name "Fares Alaboud"
-```
-
-7. Enable Email OTPs
+5. Enable Email OTPs
 
 Once the Postmark API key is set in the `.env` file, go to `/models/auth.py:17` and change the value to `False`.
