@@ -14,7 +14,7 @@ load_dotenv()
 postmark = PostmarkClient(server_token=os.getenv('POSTMARK_API_KEY'))
 
 # Development settings
-DISABLE_EMAILS = True  # Set to False in production
+DISABLE_EMAILS = False  # Set to False in production
 
 def create_organization(name, superuser_email, superuser_name):
     """Create a new organization with its superuser. Only platform admin can do this."""
