@@ -78,7 +78,7 @@ def get_organization(org_id):
     """Get organization details"""
     with get_db_cursor() as cursor:
         cursor.execute("""
-            SELECT id, name, created_at, subscription_tier, max_users
+            SELECT id, name, created_at, subscription_tier
             FROM organizations
             WHERE id = %s
         """, (org_id,))
@@ -88,8 +88,7 @@ def get_organization(org_id):
                 'id': result[0],
                 'name': result[1],
                 'created_at': result[2],
-                'subscription_tier': result[3],
-                'max_users': result[4]
+                'subscription_tier': result[3]
             }
         return None
 
@@ -120,30 +119,11 @@ def create_user(email, name, role='Normal', organization_id=None):
 def add_user_to_organization(user_id, organization_id):
     """Add a user to an organization"""
     with get_db_cursor() as cur:
-        # Check if organization has reached max users
-        cur.execute("""
-            SELECT o.max_users, COUNT(ou.user_id)
-            FROM organizations o
-            LEFT JOIN organization_users ou ON o.id = ou.organization_id
-            WHERE o.id = %s
-            GROUP BY o.max_users
-        """, (organization_id,))
-        result = cur.fetchone()
-        if result:
-            max_users, current_users = result
-            if current_users >= max_users:
-                raise DatabaseError("Organization has reached maximum user limit")
-
         # Add user to organization
         cur.execute("""
             INSERT INTO organization_users (organization_id, user_id)
             VALUES (%s, %s)
         """, (organization_id, user_id))
-        cur.execute("""
-            UPDATE organizations
-            SET max_users = max_users + 1
-            WHERE id = %s
-        """, (organization_id,))
         return True
 
 def get_user_organizations(user_id):

@@ -24,8 +24,7 @@ def migrate_data(app):
         try:
             org_id = create_organization(
                 name="Test Organization",
-                subscription_tier="enterprise",
-                max_users=100
+                subscription_tier="enterprise"
             )
             print(f"Created organization with ID: {org_id}")
             
@@ -167,18 +166,8 @@ def init_db():
                     id SERIAL PRIMARY KEY,
                     name VARCHAR(100) NOT NULL,
                     superuser_id INTEGER,  -- Will be updated after user creation
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    max_users INTEGER DEFAULT 10 NOT NULL
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-
-                -- Add max_users column if it doesn't exist
-                DO $$ 
-                BEGIN 
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                                WHERE table_name='organizations' AND column_name='max_users') THEN
-                        ALTER TABLE organizations ADD COLUMN max_users INTEGER DEFAULT 10 NOT NULL;
-                    END IF;
-                END $$;
 
                 CREATE TABLE IF NOT EXISTS organization_users (
                     organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
