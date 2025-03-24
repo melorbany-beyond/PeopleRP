@@ -69,6 +69,14 @@ def login():
         
         # Generate and store OTP
         otp = generate_otp(email)
+        if otp:
+            # Send OTP email
+            send_otp_email(email, otp)
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to generate OTP'
+            }), 500
         
         return jsonify({
             'success': True,
