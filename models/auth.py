@@ -14,7 +14,7 @@ load_dotenv()
 postmark = PostmarkClient(server_token=os.getenv('POSTMARK_API_KEY'))
 
 # Development settings
-DISABLE_EMAILS = False  # Set to False in production
+DISABLE_EMAILS = os.getenv('POSTMARK_DISABLE_EMAILS', 'True').lower() == 'true'  # Default to True if not set
 
 def create_organization(name, superuser_email, superuser_name):
     """Create a new organization with its superuser. Only platform admin can do this."""
@@ -228,49 +228,26 @@ def send_otp_email(email, otp):
         print(f"=======================\n")
         return
 
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-            .otp-box {{ 
-                background-color: #f8f9fa;
-                border-radius: 4px;
-                padding: 20px;
-                text-align: center;
-                font-size: 24px;
-                letter-spacing: 4px;
-                margin: 20px 0;
-            }}
-            .note {{ 
-                font-size: 14px;
-                color: #666;
-                text-align: center;
-                margin-top: 20px;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h2>Your Login Code</h2>
-            <p>Use the following code to log in to your account. This code will expire in 5 minutes.</p>
-            <div class="otp-box">
-                <strong>{otp}</strong>
-            </div>
-            <p class="note">If you didn't request this code, you can safely ignore this email.</p>
-        </div>
-    </body>
-    </html>
-    """
-    
-    postmark.emails.send(
-        From=os.getenv('POSTMARK_SENDER_EMAIL', 'noreply@yourdomain.com'),
-        To=email,
-        Subject="Your Login Code",
-        HtmlBody=html_content
-    )
+    try:
+        postmark.emails.send(
+            From=os.getenv('POSTMARK_SENDER_EMAIL'),
+            To=email,
+            Subject='Your Beyond PeopleRP Login Code',
+            TextBody=f'Your login code is: {otp}\n\nThis code will expire in 10 minutes.',
+            HtmlBody=f'''
+                <h2>Your Beyond PeopleRP Login Code</h2>
+                <p>Your login code is: <strong>{otp}</strong></p>
+                <p>This code will expire in 10 minutes.</p>
+                <p>If you didn't request this code, please ignore this email.</p>
+            '''
+        )
+        current_app.logger.info(f"OTP email sent to {email}")
+    except Exception as e:
+        current_app.logger.error(f"Failed to send OTP email: {str(e)}")
+        if DISABLE_EMAILS:
+            print(f"Would have sent email to {email} with OTP {otp}")
+        else:
+            raise
 
 def get_user_role(user_id, organization_id):
     """Get user's role in an organization"""

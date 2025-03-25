@@ -46,7 +46,7 @@ def create_app(test_config=None):
             return session['lang']
         return request.accept_languages.best_match(app.config['LANGUAGES'].keys())
 
-    babel.init_app(app)
+    babel.init_app(app, locale_selector=locale_selector)
 
     @app.context_processor
     def inject_template_globals():
