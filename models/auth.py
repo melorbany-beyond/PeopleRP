@@ -336,39 +336,82 @@ def get_organization_users(organization_id, current_user_id):
             for row in cur.fetchall()
         ]
 
-def invite_user(organization_id, inviter_id, name, email, role='Normal'):
-    """Invite a new user to an organization"""
-    inviter_role = get_user_role(inviter_id, organization_id)
-    
-    # Only superusers can create privileged users
-    if role == 'Privileged' and inviter_role != 'Superuser':
-        return None, 'Insufficient permissions'
-    
-    # Cannot create superusers through invitation
-    if role == 'Superuser':
-        return None, 'Cannot create superuser through invitation'
-        
+def send_welcome_email(email, name):
+    """Send welcome email to new user"""
+    if DISABLE_EMAILS:
+        print(f"\n=== DEVELOPMENT MODE ===")
+        print(f"Welcome email to: {email}")
+        print(f"Name: {name}")
+        print(f"=======================\n")
+        return
+
+    try:
+        postmark.emails.send(
+            From=os.getenv('POSTMARK_SENDER_EMAIL'),
+            To=email,
+            Subject='Welcome to Beyond PeopleRP',
+            TextBody=f'''Welcome to Beyond PeopleRP!
+
+You have been invited to join Beyond PeopleRP. Please visit rp.beyondcompany.sa to log in.
+
+Best regards,
+The Beyond Team''',
+            HtmlBody=f'''
+                <h2>Welcome to Beyond PeopleRP!</h2>
+                <p>You have been invited to join Beyond PeopleRP. Please visit <a href="https://rp.beyondcompany.sa">rp.beyondcompany.sa</a> to log in.</p>
+                <p>Best regards,<br>The Beyond Team</p>
+            '''
+        )
+        current_app.logger.info(f"Welcome email sent to {email}")
+    except Exception as e:
+        current_app.logger.error(f"Failed to send welcome email: {str(e)}")
+        if DISABLE_EMAILS:
+            print(f"Would have sent welcome email to {email}")
+        else:
+            raise
+
+def invite_user(email, name, role='Normal', org_id=None):
+    """Invite a new user to the organization"""
     with get_db_cursor() as cur:
-        # Check if email already exists
-        cur.execute("SELECT id FROM users WHERE email = %s", (email,))
-        if cur.fetchone():
-            return None, 'Email already exists'
+        try:
+            # Check if user already exists
+            cur.execute("SELECT id FROM users WHERE email = %s", (email,))
+            existing_user = cur.fetchone()
             
-        # Create user
-        cur.execute("""
-            INSERT INTO users (name, email, role, is_active)
-            VALUES (%s, %s, %s, true)
-            RETURNING id
-        """, (name, email, role))
-        user_id = cur.fetchone()[0]
-        
-        # Add to organization
-        cur.execute("""
-            INSERT INTO organization_users (organization_id, user_id)
-            VALUES (%s, %s)
-        """, (organization_id, user_id))
-        
-        return user_id, None
+            if existing_user:
+                user_id = existing_user[0]
+                # Update user's role if they're new to this organization
+                if org_id:
+                    cur.execute("""
+                        INSERT INTO organization_users (user_id, organization_id, role)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (user_id, organization_id) 
+                        DO UPDATE SET role = EXCLUDED.role
+                    """, (user_id, org_id, role))
+            else:
+                # Create new user
+                cur.execute("""
+                    INSERT INTO users (email, name, role, is_active)
+                    VALUES (%s, %s, %s, true)
+                    RETURNING id
+                """, (email, name, role))
+                user_id = cur.fetchone()[0]
+                
+                # Add to organization if specified
+                if org_id:
+                    cur.execute("""
+                        INSERT INTO organization_users (user_id, organization_id, role)
+                        VALUES (%s, %s, %s)
+                    """, (user_id, org_id, role))
+            
+            # Send welcome email
+            send_welcome_email(email, name)
+            
+            return user_id
+            
+        except Exception as e:
+            current_app.logger.error(f"Error inviting user: {str(e)}")
+            raise DatabaseError(f"Failed to invite user: {str(e)}")
 
 def update_user_status(user_id, organization_id, is_active, updater_id):
     """Update user's active status"""

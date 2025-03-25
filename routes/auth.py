@@ -159,7 +159,7 @@ def register():
 
 @bp.route('/invite', methods=['POST'])
 @login_required
-def invite_user():
+def handle_invite_user():
     """Invite a new user to the organization"""
     org_id = session.get('organization_id')
     if not org_id:
@@ -179,43 +179,18 @@ def invite_user():
         return jsonify({'error': 'Cannot create superuser through invitation'}), 403
     
     try:
-        # Check if user already exists
-        existing_user = get_user_by_email(data['email'])
-        if existing_user:
-            # If user exists, just add them to the organization
-            try:
-                add_user_to_organization(existing_user['id'], org_id)
-                return jsonify({
-                    'message': 'Existing user added to organization successfully.',
-                    'user_id': existing_user['id']
-                }), 200
-            except DatabaseError as e:
-                if "duplicate key" in str(e):
-                    return jsonify({'error': 'User is already a member of this organization'}), 400
-                raise
-        
-        # Create new user if they don't exist
-        user_id = create_user(
+        # Create new user and add to organization
+        user_id = invite_user(
             email=data['email'],
             name=data['name'],
-            role=role  # Role is set in users table
+            role=role,
+            org_id=org_id
         )
         
-        # Add user to organization
-        add_user_to_organization(user_id, org_id)
-        
-        # Generate and send OTP for first-time login
-        otp = generate_otp(data['email'])
-        if otp:
-            # Send OTP email
-            send_otp_email(data['email'], otp)
-            
-            return jsonify({
-                'message': 'User invited successfully. They will receive a login code via email.',
-                'user_id': user_id
-            }), 201
-        else:
-            return jsonify({'error': 'Failed to generate OTP'}), 500
+        return jsonify({
+            'message': 'User invited successfully. They will receive a welcome email.',
+            'user_id': user_id
+        }), 201
             
     except DatabaseError as e:
         if "duplicate key" in str(e):
@@ -252,26 +227,16 @@ def invite_org_user(org_id):
     data = request.get_json()
     
     try:
-        # Create user if they don't exist
-        try:
-            user_id = create_user(
-                email=data['email'],
-                name=data['name']
-            )
-        except Exception as e:
-            # User might already exist
-            return jsonify({'error': str(e)}), 400
-        
-        # Add user to organization
-        add_user_to_organization(user_id, org_id, role=data.get('role', 'member'))
-        
-        # Generate and send OTP for first-time login
-        otp = generate_otp()
-        store_otp(data['email'], otp)
-        send_otp_email(data['email'], otp)
+        # Create new user and add to organization
+        user_id = invite_user(
+            email=data['email'],
+            name=data['name'],
+            role=data.get('role', 'Normal'),
+            org_id=org_id
+        )
         
         return jsonify({
-            'message': 'User invited successfully. They will receive a login code via email.',
+            'message': 'User invited successfully. They will receive a welcome email.',
             'user_id': user_id
         }), 201
         
