@@ -66,16 +66,13 @@ def update_person(person_id, person_data):
             UPDATE people 
             SET name = %s,
                 role = %s,
-                availability = %s,
-                updated_by = %s,
-                updated_at = CURRENT_TIMESTAMP
+                availability = %s
             WHERE id = %s
             RETURNING id
         """, (
             person_data['name'],
             person_data['role'],
             person_data['availability'],
-            person_data['updated_by'],
             person_id
         ))
         return cur.fetchone() is not None
@@ -113,9 +110,7 @@ def update_project(project_id, project_data):
                 project_type = %s,
                 status = %s,
                 start_date = %s,
-                end_date = %s,
-                updated_by = %s,
-                updated_at = CURRENT_TIMESTAMP
+                end_date = %s
             WHERE id = %s
             RETURNING id
         """, (
@@ -124,7 +119,6 @@ def update_project(project_id, project_data):
             project_data['status'],
             project_data['start_date'],
             project_data['end_date'],
-            project_data['updated_by'],
             project_id
         ))
         return cur.fetchone() is not None
@@ -186,30 +180,67 @@ def get_current_assignments(date=None):
         cursor.execute("""
             SELECT a.id, a.project_id, p.name as project_name, 
                    a.person_id, pe.name as person_name,
-                   a.allocation, a.start_date, a.end_date
+                   a.allocation, a.start_date, a.end_date,
+                   p.status as project_status
             FROM assignments a
             JOIN projects p ON a.project_id = p.id
             JOIN people pe ON a.person_id = pe.id
             WHERE %s BETWEEN a.start_date AND a.end_date
+            AND p.status NOT IN ('Completed', 'Cancelled')
         """, (date,))
         
         columns = ['id', 'project_id', 'project_name', 'person_id', 'person_name',
-                'allocation', 'start_date', 'end_date']
+                'allocation', 'start_date', 'end_date', 'project_status']
         return pd.DataFrame(cursor.fetchall(), columns=columns)
+
+def calculate_total_allocation(person_id, date=None):
+    """Calculate total allocation for a person on a given date"""
+    if date is None:
+        date = datetime.now().strftime('%Y-%m-%d')
+    
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            SELECT COALESCE(SUM(
+                CASE 
+                    WHEN %s BETWEEN a.start_date AND a.end_date 
+                    AND p.status NOT IN ('Not Started', 'Completed', 'Cancelled')
+                    THEN a.allocation 
+                    ELSE 0 
+                END
+            ), 0) as total_allocation
+            FROM assignments a
+            JOIN projects p ON a.project_id = p.id
+            WHERE a.person_id = %s
+        """, (date, person_id))
+        
+        result = cursor.fetchone()
+        return result[0] if result else 0
 
 def get_project_assignments(project_id):
     """Get all assignments for a project"""
     with get_db_cursor() as cursor:
         cursor.execute("""
             SELECT a.id, a.project_id, a.person_id, p.name as person_name,
-                   a.allocation, a.start_date, a.end_date
+                   a.allocation, a.start_date, a.end_date,
+                   COALESCE(SUM(
+                       CASE 
+                           WHEN CURRENT_DATE BETWEEN a2.start_date AND a2.end_date 
+                           AND p2.status NOT IN ('Not Started', 'Completed', 'Cancelled')
+                           THEN a2.allocation 
+                           ELSE 0 
+                       END
+                   ), 0) as total_allocation
             FROM assignments a
             JOIN people p ON a.person_id = p.id
+            LEFT JOIN assignments a2 ON p.id = a2.person_id
+            LEFT JOIN projects p2 ON a2.project_id = p2.id
             WHERE a.project_id = %s
+            GROUP BY a.id, a.project_id, a.person_id, p.name,
+                     a.allocation, a.start_date, a.end_date
         """, (project_id,))
         
         columns = ['id', 'project_id', 'person_id', 'person_name',
-                'allocation', 'start_date', 'end_date']
+                'allocation', 'start_date', 'end_date', 'total_allocation']
         return pd.DataFrame(cursor.fetchall(), columns=columns)
 
 def get_available_people(project_id):

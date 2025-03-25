@@ -196,7 +196,7 @@ def init_db():
                 )
             """)
             
-            # Create people table with organization_id and audit fields
+            # Create people table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS people (
                     id SERIAL PRIMARY KEY,
@@ -204,14 +204,11 @@ def init_db():
                     role VARCHAR(100) NOT NULL,
                     availability VARCHAR(50) NOT NULL,
                     organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
-                    created_by INTEGER REFERENCES users(id),
-                    updated_by INTEGER REFERENCES users(id),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
-            # Create projects table with organization_id and audit fields
+            # Create projects table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS projects (
                     id SERIAL PRIMARY KEY,
@@ -221,10 +218,7 @@ def init_db():
                     start_date DATE,
                     end_date DATE,
                     organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
-                    created_by INTEGER REFERENCES users(id),
-                    updated_by INTEGER REFERENCES users(id),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
@@ -237,83 +231,21 @@ def init_db():
                     allocation INTEGER NOT NULL,
                     start_date DATE,
                     end_date DATE,
-                    created_by INTEGER REFERENCES users(id),
-                    updated_by INTEGER REFERENCES users(id),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     UNIQUE(project_id, person_id)
                 )
             """)
             
-            # Create a trigger function to update updated_at timestamp
-            cur.execute("""
-                CREATE OR REPLACE FUNCTION update_updated_at_column()
-                RETURNS TRIGGER AS $$
-                BEGIN
-                    NEW.updated_at = CURRENT_TIMESTAMP;
-                    RETURN NEW;
-                END;
-                $$ language 'plpgsql';
-            """)
-            
-            # Create triggers for all tables with updated_at
-            for table in ['people', 'projects', 'assignments']:
-                cur.execute(f"""
-                    DROP TRIGGER IF EXISTS update_{table}_updated_at ON {table};
-                    CREATE TRIGGER update_{table}_updated_at
-                        BEFORE UPDATE ON {table}
-                        FOR EACH ROW
-                        EXECUTE FUNCTION update_updated_at_column();
-                """)
-            
-            # Commit schema changes
             db.commit()
             
-            # Start a new transaction for data insertion
-            cur.execute("SELECT COUNT(*) FROM users")
-            if cur.fetchone()[0] == 0:
-                # Insert test superuser
-                cur.execute("""
-                    INSERT INTO users (email, name, role)
-                    VALUES ('test@example.com', 'Test User', 'Superuser')
-                    RETURNING id
-                """)
-                superuser_id = cur.fetchone()[0]
-                
-                # Create test organization
-                cur.execute("""
-                    INSERT INTO organizations (name, superuser_id)
-                    VALUES ('Test Organization', %s)
-                    RETURNING id
-                """, (superuser_id,))
-                org_id = cur.fetchone()[0]
-                
-                # Link superuser to organization
-                cur.execute("""
-                    INSERT INTO organization_users (user_id, organization_id)
-                    VALUES (%s, %s)
-                """, (superuser_id, org_id))
-                
-                # Commit data changes
-                db.commit()
-            
-            current_app.logger.info("Database initialized successfully")
-            
-    except (psycopg2.Error, DatabaseError) as e:
+    except Exception as e:
+        current_app.logger.error(f"Error initializing database: {str(e)}")
         if 'db' in locals():
-            try:
-                db.rollback()
-            except:
-                pass
-        current_app.logger.error(f"Database initialization failed: {str(e)}")
-        raise DatabaseError(f"Failed to initialize database: {str(e)}")
+            db.rollback()
+        raise
     finally:
-        # Close the connection
         if 'db' in locals():
-            try:
-                db.close()
-            except:
-                pass 
+            db.close()
 
 def get_db_connection():
     """Get a database connection"""

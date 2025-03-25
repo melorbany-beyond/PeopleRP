@@ -207,7 +207,8 @@
                             {% if project.status not in ['Not Started', 'Completed'] %}
                             <div class="text-sm">
                                 {{ project.name }} ({{ project.allocation }}%)
-                                <span class="text-xs text-gray-500">[{{ _(project.status) }}]</span>
+                                <!-- <span class="text-xs text-gray-500">[{{ _(project.status) }}]</span> -->
+                                <span class="text-xs text-gray-500">until {{ project.assignment_end_date }}</span>
                             </div>
                             {% endif %}
                             {% endfor %}

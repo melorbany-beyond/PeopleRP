@@ -72,24 +72,4 @@ CREATE TABLE otps (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
     is_valid BOOLEAN DEFAULT true
-);
-
--- Create trigger function for updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Create triggers for projects and people
-CREATE TRIGGER update_projects_updated_at
-    BEFORE UPDATE ON projects
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_people_updated_at
-    BEFORE UPDATE ON people
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column(); 
+); 

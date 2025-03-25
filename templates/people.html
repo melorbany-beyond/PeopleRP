@@ -123,11 +123,10 @@
 </div>
 
 <!-- Add/Edit Person Modal -->
-<div id="personModal" class="fixed inset-0 transition-opacity duration-300 ease-in-out opacity-0 pointer-events-none">
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50"></div>
-    <div class="relative z-10">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white transform transition-all duration-300 ease-in-out -translate-y-4 opacity-0">
-            <div class="mt-3">
+<div id="personModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="p-6">
                 <h3 class="text-lg font-medium text-gray-900" id="modalTitle">{{ _('Add Team Member') }}</h3>
                 <form id="personForm" class="mt-4">
                     <input type="hidden" id="personId">
@@ -147,7 +146,7 @@
                         </select>
                     </div>
                     <div class="flex justify-end space-x-4">
-                        <button type="button" onclick="closeModal()"
+                        <button type="button" onclick="closePersonModal()"
                                 class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg">
                             {{ _('Cancel') }}
                         </button>
@@ -171,7 +170,6 @@ let currentSort = {
 // Modal management functions
 function openPersonModal() {
     const modal = document.getElementById('personModal');
-    const modalContent = modal.querySelector('.relative.top-20');
     
     // Reset form
     document.getElementById('modalTitle').textContent = "{{ _('Add Team Member') }}";
@@ -179,17 +177,12 @@ function openPersonModal() {
     document.getElementById('name').value = '';
     document.getElementById('role').value = '';
     
-    // Show modal with animation
-    modal.classList.remove('pointer-events-none');
-    requestAnimationFrame(() => {
-        modal.classList.add('opacity-100');
-        modalContent.classList.remove('-translate-y-4', 'opacity-0');
-    });
+    // Show modal
+    modal.classList.remove('hidden');
 }
 
 function openEditModal(id, name, role) {
     const modal = document.getElementById('personModal');
-    const modalContent = modal.querySelector('.relative.top-20');
     
     // Set form values
     document.getElementById('modalTitle').textContent = "{{ _('Edit Team Member') }}";
@@ -197,27 +190,14 @@ function openEditModal(id, name, role) {
     document.getElementById('name').value = name;
     document.getElementById('role').value = role;
     
-    // Show modal with animation
-    modal.classList.remove('pointer-events-none');
-    requestAnimationFrame(() => {
-        modal.classList.add('opacity-100');
-        modalContent.classList.remove('-translate-y-4', 'opacity-0');
-    });
+    // Show modal
+    modal.classList.remove('hidden');
 }
 
-function closeModal() {
+function closePersonModal() {
     const modal = document.getElementById('personModal');
-    const modalContent = modal.querySelector('.relative.top-20');
-    
-    // Hide modal with animation
-    modalContent.classList.add('-translate-y-4', 'opacity-0');
-    modal.classList.remove('opacity-100');
-    
-    // Wait for animation to finish before hiding completely
-    setTimeout(() => {
-        modal.classList.add('pointer-events-none');
-        document.getElementById('personForm').reset();
-    }, 300);
+    modal.classList.add('hidden');
+    document.getElementById('personForm').reset();
 }
 
 // Person management functions
