@@ -66,16 +66,13 @@ def update_person(person_id, person_data):
             UPDATE people 
             SET name = %s,
                 role = %s,
-                availability = %s,
-                updated_by = %s,
-                updated_at = CURRENT_TIMESTAMP
+                availability = %s
             WHERE id = %s
             RETURNING id
         """, (
             person_data['name'],
             person_data['role'],
             person_data['availability'],
-            person_data['updated_by'],
             person_id
         ))
         return cur.fetchone() is not None
@@ -113,9 +110,7 @@ def update_project(project_id, project_data):
                 project_type = %s,
                 status = %s,
                 start_date = %s,
-                end_date = %s,
-                updated_by = %s,
-                updated_at = CURRENT_TIMESTAMP
+                end_date = %s
             WHERE id = %s
             RETURNING id
         """, (
@@ -124,7 +119,6 @@ def update_project(project_id, project_data):
             project_data['status'],
             project_data['start_date'],
             project_data['end_date'],
-            project_data['updated_by'],
             project_id
         ))
         return cur.fetchone() is not None
@@ -191,6 +185,7 @@ def get_current_assignments(date=None):
             JOIN projects p ON a.project_id = p.id
             JOIN people pe ON a.person_id = pe.id
             WHERE %s BETWEEN a.start_date AND a.end_date
+            AND p.status NOT IN ('Completed', 'Cancelled')
         """, (date,))
         
         columns = ['id', 'project_id', 'project_name', 'person_id', 'person_name',

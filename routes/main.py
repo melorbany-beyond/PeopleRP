@@ -86,6 +86,15 @@ def get_project_status(project):
         elif project['status'] == 'On Hold':
             return 'On Hold'
         else:
+            # If project was On Hold and is being changed to Active,
+            # recalculate based on dates
+            if project['status'] == 'Active':
+                if start_date <= today and end_date >= today:
+                    return 'Active'
+                elif start_date > today:
+                    return 'Not Started'
+                elif end_date < today:
+                    return 'Overdue'
             return 'Active'
     except (ValueError, KeyError):
         return 'Active'  # Default fallback
@@ -224,8 +233,8 @@ def projects():
         with get_db_cursor() as cur:
             cur.execute("""
                 INSERT INTO projects 
-                (name, project_type, status, start_date, end_date, organization_id, created_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                (name, project_type, status, start_date, end_date, organization_id)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (
                 data['name'],
@@ -233,8 +242,7 @@ def projects():
                 data['status'],
                 data['start_date'],
                 data['end_date'],
-                org_id,
-                session['user_id']
+                org_id
             ))
             project_id = cur.fetchone()[0]
             return jsonify({'id': project_id, 'message': 'Project created successfully'})
@@ -312,10 +320,46 @@ def manage_project(project_id):
             'project_type': data['project_type'],
             'status': data['status'],
             'start_date': data['start_date'],
-            'end_date': data['end_date'],
-            'updated_by': session['user_id']
+            'end_date': data['end_date']
         }
+        
+        # Check if dates have changed and update status accordingly
+        today = datetime.now().date()
+        start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
+        end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+        
+        # If start date is today and project is not manually set to On Hold,
+        # set status to Active
+        if start_date == today and project_data['status'] != 'On Hold':
+            project_data['status'] = 'Active'
+        # If end date is yesterday and project is not manually set to On Hold,
+        # set status to Overdue
+        elif end_date < today and project_data['status'] != 'On Hold':
+            project_data['status'] = 'Overdue'
+        
+        # Update the project
         update_project(project_id, project_data)
+        
+        # Get the updated project with recalculated automated status
+        with get_db_cursor() as cur:
+            cur.execute("""
+                SELECT id, name, project_type, status, start_date, end_date
+                FROM projects
+                WHERE id = %s
+            """, (project_id,))
+            row = cur.fetchone()
+            if row:
+                project = {
+                    'id': row[0],
+                    'name': row[1],
+                    'project_type': row[2],
+                    'status': row[3],
+                    'start_date': row[4],
+                    'end_date': row[5]
+                }
+                project['automated_status'] = get_project_status(project)
+                return jsonify({'success': True, 'project': project})
+        
         return jsonify({'success': True, 'project': data})
 
 @bp.route('/people', methods=['GET', 'POST'])
@@ -331,15 +375,14 @@ def people():
         with get_db_cursor() as cur:
             cur.execute("""
                 INSERT INTO people 
-                (name, role, availability, organization_id, created_by)
-                VALUES (%s, %s, %s, %s, %s)
+                (name, role, availability, organization_id)
+                VALUES (%s, %s, %s, %s)
                 RETURNING id
             """, (
                 data['name'],
                 data['role'],
                 data['availability'],
-                org_id,
-                session['user_id']
+                org_id
             ))
             person_id = cur.fetchone()[0]
             return jsonify({'id': person_id, 'message': 'Person added successfully'})
@@ -383,8 +426,7 @@ def manage_person(person_id):
         person_data = {
             'name': data['name'],
             'role': data['role'],
-            'availability': data['availability'],
-            'updated_by': session['user_id']
+            'availability': data['availability']
         }
         update_person(person_id, person_data)
         return jsonify({'success': True, 'person': data})
