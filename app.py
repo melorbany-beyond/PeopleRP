@@ -10,7 +10,7 @@ from database import init_db, DatabaseError, close_db
 import psycopg2
 import traceback
 import os
-from routes import auth, main
+from routes import auth, main, calendar
 from dotenv import load_dotenv
 
 def create_app(test_config=None):
@@ -72,6 +72,8 @@ def create_app(test_config=None):
     # Register blueprints
     app.register_blueprint(auth.bp, url_prefix='/auth')
     app.register_blueprint(main.bp)
+    app.register_blueprint(calendar.bp)
+
 
     # Initialize database
     with app.app_context():

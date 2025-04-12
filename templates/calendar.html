@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6 mb-6">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900">{{ _('Availability Calendar') }}</h1>
+            <p class="text-sm text-gray-500 mt-1">{{ _('Last Updated:') }} {{ last_updated.replace('T', ' ').split('.')[0] }} GMT</p>
+        </div>
+        <form action="{{ url_for('calendar.update_holidays') }}" method="post">
+            <button type="submit" 
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {{ _('Update Holidays') }}
+            </button>
+        </form>
+    </div>
+</div>
+
+<div id="calendar" class="bg-white shadow rounded-lg p-6"></div>
+
+<!-- Include FullCalendar CSS & JS via CDN -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Google Calendar-like colors
+    const googleColors = [
+        '#a4bdfc', // Light Blue
+        '#7ae7bf', // Light Green
+        '#dbadff', // Light Purple
+        '#ff887c', // Light Red
+        '#fbd75b', // Light Yellow
+        '#ffb878', // Light Orange
+        '#46d6db', // Light Teal
+        '#e1e1e1', // Light Gray
+        '#5484ed', // Blue
+        '#51b749', // Green
+        '#dc2127', // Red
+        '#fbe983', // Yellow
+        '#ffb878', // Orange
+        '#7bd148', // Dark Green
+        '#7ae7bf', // Mint
+        '#46d6db', // Teal
+        '#5484ed', // Blue
+        '#51b749', // Green
+        '#dc2127', // Red
+        '#fbe983'  // Yellow
+    ];
+
+    // Create a map to store colors for each employee
+    const employeeColors = new Map();
+
+    // Prepare events from holidays data (passed in from Flask)
+    var holidays = {{ holidays|tojson|safe }};
+    var events = holidays.map(function(item) {
+        // Check if it's a full day event (amount is a whole number)
+        var isFullDay = Number.isInteger(item.amount);
+        
+        // Get or create a color for this employee
+        if (!employeeColors.has(item.employee_name)) {
+            // Use a deterministic way to assign colors based on employee name
+            const hash = item.employee_name.split('').reduce((acc, char) => {
+                return char.charCodeAt(0) + ((acc << 5) - acc);
+            }, 0);
+            const colorIndex = Math.abs(hash) % googleColors.length;
+            employeeColors.set(item.employee_name, googleColors[colorIndex]);
+        }
+        
+        return {
+            title: isFullDay ? item.employee_name : `${item.employee_name} (${item.amount}h)`,
+            start: item.from_date,
+            end: item.to_date,
+            allDay: isFullDay,
+            backgroundColor: employeeColors.get(item.employee_name),
+            borderColor: employeeColors.get(item.employee_name),
+            textColor: '#000000', // Black text for better contrast
+            extendedProps: {
+                notes: item.notes || ""
+            }
+        };
+    });
+
+    // Initialize FullCalendar
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        events: events,
+        eventTimeFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: false
+        }
+    });
+    calendar.render();
+});
+</script>
+{% endblock %}
