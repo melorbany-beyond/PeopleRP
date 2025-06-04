@@ -12,6 +12,7 @@ import traceback
 import os
 from routes import auth, main, calendar
 from dotenv import load_dotenv
+from scheduler import start_scheduler
 
 def create_app(test_config=None):
     # Load environment variables from .env file
@@ -85,6 +86,13 @@ def create_app(test_config=None):
         
         # Register database close function
         app.teardown_appcontext(close_db)
+        
+        # Start the background scheduler for automated tasks
+        try:
+            start_scheduler(app)
+            app.logger.info("Background scheduler initialized successfully")
+        except Exception as e:
+            app.logger.error(f"Failed to start background scheduler: {str(e)}")
 
     @app.errorhandler(404)
     def page_not_found(e):

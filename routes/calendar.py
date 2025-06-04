@@ -47,8 +47,18 @@ def calendar_view():
     
     last_meta = load_json(META_FILE)
     last_updated = last_meta.get("last_updated", "Never")
+    last_auto_fetch = last_meta.get("last_auto_fetch", "Never")
     
-    return render_template("calendar.html", holidays=approved_holidays, last_updated=last_updated)
+    # Get automation configuration
+    fetch_interval = int(os.getenv('ZENHR_FETCH_INTERVAL_HOURS', 1))
+    auto_fetch_enabled = os.getenv('ZENHR_ENABLE_AUTO_FETCH', 'true').lower() == 'true'
+    
+    return render_template("calendar.html", 
+                         holidays=approved_holidays, 
+                         last_updated=last_updated,
+                         last_auto_fetch=last_auto_fetch,
+                         fetch_interval=fetch_interval,
+                         auto_fetch_enabled=auto_fetch_enabled)
 
 @bp.route('/update-holidays', methods=['POST'])
 def update_holidays():

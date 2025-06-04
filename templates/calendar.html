@@ -5,7 +5,34 @@
     <div class="flex justify-between items-center mb-4">
         <div>
             <h1 class="text-2xl font-semibold text-gray-900">{{ _('Availability Calendar') }}</h1>
-            <p class="text-sm text-gray-500 mt-1">{{ _('Last Updated:') }} {{ last_updated.replace('T', ' ').split('.')[0] }} GMT</p>
+            <div class="mt-1 space-y-1">
+                <p class="text-sm text-gray-500">{{ _('Last Manual Update:') }} {{ last_updated.replace('T', ' ').split('.')[0] }} GMT</p>
+                <p class="text-sm text-gray-500">{{ _('Last Auto-Fetch:') }} 
+                    {% if last_auto_fetch != "Never" %}
+                        {{ last_auto_fetch.replace('T', ' ').split('.')[0] }} GMT
+                    {% else %}
+                        {{ last_auto_fetch }}
+                    {% endif %}
+                </p>
+                <p class="text-xs text-green-600 font-medium">
+                    {% if auto_fetch_enabled %}
+                        <svg class="inline h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ _('Automatic updates every') }} {{ fetch_interval }} 
+                        {% if fetch_interval == 1 %}
+                            {{ _('hour') }}
+                        {% else %}
+                            {{ _('hours') }}
+                        {% endif %}
+                    {% else %}
+                        <svg class="inline h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ _('Automatic updates disabled') }}
+                    {% endif %}
+                </p>
+            </div>
         </div>
         <form action="{{ url_for('calendar.update_holidays') }}" method="post">
             <button type="submit" 
@@ -13,7 +40,7 @@
                 <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                {{ _('Update Holidays') }}
+                {{ _('Update Now') }}
             </button>
         </form>
     </div>
@@ -69,10 +96,36 @@ document.addEventListener('DOMContentLoaded', function() {
             employeeColors.set(item.employee_name, googleColors[colorIndex]);
         }
         
+        // Extract date portions directly to avoid timezone conversion issues
+        var startDate = item.from_date.split('T')[0]; // Get YYYY-MM-DD part
+        var endDateStr = item.to_date.split('T')[0];   // Get YYYY-MM-DD part
+        
+        var endDate;
+        if (isFullDay) {
+            // For all-day events, add one day to make the end date inclusive
+            // Parse the date components manually to avoid timezone issues
+            var parts = endDateStr.split('-');
+            var year = parseInt(parts[0]);
+            var month = parseInt(parts[1]) - 1; // JavaScript months are 0-based
+            var day = parseInt(parts[2]);
+            
+            // Create date with explicit components and add 1 day
+            var endDateObj = new Date(year, month, day + 1);
+            
+            // Format back to YYYY-MM-DD
+            var newYear = endDateObj.getFullYear();
+            var newMonth = String(endDateObj.getMonth() + 1).padStart(2, '0');
+            var newDay = String(endDateObj.getDate()).padStart(2, '0');
+            endDate = newYear + '-' + newMonth + '-' + newDay;
+        } else {
+            // For partial day events, use the original timestamp
+            endDate = item.to_date;
+        }
+        
         return {
             title: isFullDay ? item.employee_name : `${item.employee_name} (${item.amount}h)`,
-            start: item.from_date,
-            end: item.to_date,
+            start: startDate,
+            end: endDate,
             allDay: isFullDay,
             backgroundColor: employeeColors.get(item.employee_name),
             borderColor: employeeColors.get(item.employee_name),

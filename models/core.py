@@ -186,7 +186,7 @@ def get_current_assignments(date=None):
             JOIN projects p ON a.project_id = p.id
             JOIN people pe ON a.person_id = pe.id
             WHERE %s BETWEEN a.start_date AND a.end_date
-            AND p.status NOT IN ('Completed', 'Cancelled')
+            AND p.status NOT IN ('Not Started', 'Completed', 'Cancelled')
         """, (date,))
         
         columns = ['id', 'project_id', 'project_name', 'person_id', 'person_name',

@@ -396,9 +396,17 @@ def people():
     with get_db_cursor() as cur:
         cur.execute("""
             SELECT p.id, p.name, p.role, p.availability,
-                   COALESCE(SUM(a.allocation), 0) as current_allocation
+                   COALESCE(SUM(
+                       CASE 
+                           WHEN CURRENT_DATE BETWEEN a.start_date AND a.end_date 
+                           AND pr.status NOT IN ('Not Started', 'Completed', 'Cancelled')
+                           THEN a.allocation 
+                           ELSE 0 
+                       END
+                   ), 0) as current_allocation
             FROM people p
             LEFT JOIN assignments a ON p.id = a.person_id
+            LEFT JOIN projects pr ON a.project_id = pr.id
             WHERE p.organization_id = %s
             GROUP BY p.id, p.name, p.role, p.availability
             ORDER BY p.name ASC

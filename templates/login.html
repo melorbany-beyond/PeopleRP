@@ -121,6 +121,31 @@
                     e.preventDefault();
                 }
             });
+
+            // Handle paste events
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').trim();
+                
+                // Check if pasted data is exactly 6 digits
+                if (/^\d{6}$/.test(pastedData)) {
+                    // Clear all inputs first
+                    otpInputs.forEach(input => input.value = '');
+                    
+                    // Fill each input with corresponding digit
+                    for (let i = 0; i < 6; i++) {
+                        if (otpInputs[i]) {
+                            otpInputs[i].value = pastedData[i];
+                        }
+                    }
+                    
+                    // Focus the last input
+                    otpInputs[5].focus();
+                } else {
+                    // If not a valid 6-digit code, show error
+                    showError('Please paste a valid 6-digit code');
+                }
+            });
         });
 
         async function requestOTP() {
